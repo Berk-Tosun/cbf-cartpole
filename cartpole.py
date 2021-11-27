@@ -9,17 +9,21 @@ import control
 # source: https://github.com/YifanJiangPolyU/cart-pole-nonlinear-control/blob/master/cart-pole-balancing.py
 # Cart-pole dynamic system:
 # 
-#                            O ball: m2
-#                           /
-#                       q2 /
-#                      |  /  pole: l
-#                      | /
-#                 _____|/_____
-#                |            |   
-#  Force: u -->  |            | Cart: m1
-#                |____________|
-#       |-> q1     O        O
-# 
+#                                 O ball: m2
+#                                /
+#                               /
+#                              /  pole: l
+#                             /
+#                      _____ /_____
+#                     |            |   
+#  Force: u -->       |            | Cart: m1
+#                     |____________|
+#    |---> q1 (x)        O  ︙   O
+#                 ‾‾/‾‾‾/‾‾‾︙‾‾‾‾/‾‾‾/‾‾‾/‾‾  
+#                           ︙    
+#                           ︙ ⤻ 
+#                           ︙ q2 (theta)
+#                           ︙    
 
 #####################################################
 ## Define dynamics - simple pendulum
@@ -64,6 +68,7 @@ def dynamics(x, t):
 # For control purposes, express simplified dynamics:
 # Writing in the simplest form, replace pendulum with simple pendulum
 # and linearize; taken from Ogata's book (Modern Control - modelling chapter).
+# Linearization for pendulum up state, x = [?, ?, np.pi, ?]
 
 ## Ogata
 def get_ss_A():
