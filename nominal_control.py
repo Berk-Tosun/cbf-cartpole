@@ -1,16 +1,8 @@
-from cartpole import CartPole, simulate
+from cartpole import Controller, CartPole, simulate
 from visual import visualize
 
 import numpy as np
 import control
-
-
-class Controller:
-    def __call__(self, state):
-        return self.control_law(state)
-
-    def control_law(self, state):
-        raise NotImplementedError()
 
 
 class ControlLQR(Controller):

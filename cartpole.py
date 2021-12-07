@@ -11,6 +11,14 @@ from visual import visualize
 
 G = 9.8  # m/s**2
 
+class Controller:
+    def __call__(self, state):
+        return self.control_law(state)
+
+    def control_law(self, state):
+        raise NotImplementedError()
+
+
 class CartPole:
     def __init__(self, m_1=4, m_2=1, l=1.25):
         """
@@ -133,7 +141,7 @@ class CartPole:
     def control_law(x):
         return 0
 
-    def set_control_law(self, f: Callable):
+    def set_control_law(self, f: Controller):
         self.control_law = f  # type: ignore
         self._gen_dynamics()
 
