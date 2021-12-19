@@ -1,5 +1,4 @@
-from cartpole import Controller, CartPole, simulate
-from visual import visualize
+from cartpole import Controller, CartPole, simulate, visualize
 
 import numpy as np
 import control
