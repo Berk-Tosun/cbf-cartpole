@@ -28,25 +28,38 @@ class ASIF(Controller):
     """
     # def __init__(self, nominal_control, theta_barrier=165):
         # self.theta_barrier = theta_barrier
-    def __init__(self, nominal_control, barrier_cart_pos=1):
+    def __init__(self, nominal_control, cp: CartPole, barrier_cart_pos=1):
         self.nominal_control = nominal_control
+        self.cp = cp
         self.barrier_cart_pos = barrier_cart_pos
+
+        self._log = {
+            'cbf': [],
+        }
 
     def control_law(self, state):
         u_nominal = self.nominal_control(state)
-        u_filtered = u_nominal
-        # u_filtered = self._asif(u_nominal, state)
+        # u_filtered = u_nominal
+        u_filtered = self._asif(u_nominal, state)
+        if np.isclose(u_filtered, u_nominal)[0] == False:
+            print(f"ASIF active! {u_nominal=}, {u_filtered=}")
         return u_filtered
 
     def _asif(self, u_nominal, state):
-        p = []
-        q = []
-        g = []
-        h = []
-        a = []
-        b = []
+        gamma = 1e-3
 
-        return solve_qp(p, q, g, h, a, b)
+        p = np.array([1.])
+        q = np.array([-u_nominal]).flatten()
+        g = np.array([-1/self.cp.m_1])
+        h = np.array([G*self.cp.m_2/self.cp.m_1*state[2] 
+            - gamma*state[1] + gamma])
+
+        self._log['cbf'].append(self._h(state))
+
+        return solve_qp(p, q, g, h,
+            lb=np.array([-100.]), 
+            ub=np.array([100.]),
+            solver="cvxopt")
 
     # def _h(self, state):
     #     return abs(state[2]) - self.theta_barrier * np.pi/180
