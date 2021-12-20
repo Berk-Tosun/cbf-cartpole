@@ -8,8 +8,9 @@ Folder structure:
 
 * cartpole.py: Cartpole dynamics and simulation
 * nominal_control.py: Nominal controllers
-* cbf_deterministic: Safety-Critical control with classical CBF
+* cbf_deterministic: Safety-Critical control with CBF-QP
 * cbf_learning: Safety-Critical control with model uncertainty, CBF + learning
 * ecbf_deterministic: Exponential CBF with known model
 * ecbf_learning: Exponential CBF with unknown model, ECBF + learning
 
+* acc.py: Adaptive cruise control via CBF-QP
