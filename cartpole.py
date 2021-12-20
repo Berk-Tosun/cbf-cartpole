@@ -168,7 +168,18 @@ def simulate(cp: CartPole,
     """
     t = np.arange(0.0, t_end, dt)
 
-    y = integrate.odeint(cp.dynamics, x0, t, **kwargs)
+    # y = integrate.odeint(cp.dynamics, x0, t, **kwargs)
+    # use euler to match sizes of y and ASIF._log, i.e. to fix:
+    # len_calls(integrate.odeint(cp.dynamics)) > len(y)
+    # with good-old-euler, they are the same.
+    x_prev = np.array(x0)
+    y = []
+    for ts in t:
+        y.append(x_prev)
+        x = cp.dynamics(x_prev, ts) * dt + x_prev
+        x_prev = x
+    y = np.array(y)
+
     return y, t
 
 
