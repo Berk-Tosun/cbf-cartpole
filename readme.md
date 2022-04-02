@@ -6,10 +6,10 @@ no simulator is used; instead, full dynamics of the cartpole is integrated.
 
 Folder structure:
 
-* `acc.py`: Most well-known, simple example: adaptive cruise control via CBF-QP
+* `acc.py`: Most well-known, simple example: adaptive cruise control via CBF-QP. (not related to cartpole)
 
 
-* `cartpole.py`: Cartpole dynamics and simulation
+* `cartpole.py`: Cartpole dynamics and simulation, all controllers use it as plant
 * `nominal_control.py`: Nominal controllers
 * `cbf_deterministic`: Safety-Critical control with classical CBF
 * `cbf_learning`: Safety-Critical control with model uncertainty, CBF + learning (TODO)
