@@ -13,11 +13,40 @@ import matplotlib.animation as animation
 G = 9.81  # m/s**2
 
 class Controller:
+    def __init__(self):
+        self._log = {}
+
     def __call__(self, state):
         return self.control_law(state)
 
     def control_law(self, state):
         raise NotImplementedError()
+
+    def match_log_with_time(self, t, nfe):
+        """
+        Since scipy.integrate may make multiple function calls for each step
+        the internal log will have more elements than time vector, t. Use 
+        infodict['nfe'] - cumulative number of function evaluation for each 
+        time step - to match log with t.
+
+        Args: 
+            t: t as returned by scipy.integrate
+            nfe: infodict['nfe'] as returned by scipy.integrate
+
+        Returns:
+            log: log with same number of elements as t
+        """
+        nfe = np.insert(nfe, 0, 1)
+        nfe = nfe - 1
+
+        log = {}
+        for k, v in self._log.items():
+            try:
+                log[k] = np.array(v)[nfe]
+            except IndexError:
+                log[k] = []
+
+        return log
 
 
 class CartPole:
