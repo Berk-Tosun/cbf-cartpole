@@ -1,13 +1,12 @@
-Following repository is a minimalistic environment for playing out with 
+Following repository is a minimalistic environment for experimenting with 
 Control Barrier Functions (CBF).
 
 The classical benchmark cartpole is used as the plant model. To keep it simple
-no simulator is used; instead, full dynamics of the cartpole is integrated.
+no simulator is used; instead, full non-linear dynamics of the cartpole is integrated.
 
-Folder structure:
+Folder structure (ordered with increasing difficulty):
 
 * `acc.py`: Most well-known, simple example: adaptive cruise control via CBF-QP. (not related to cartpole)
-
 
 * `cartpole.py`: Cartpole dynamics and simulation, all controllers use it as plant
 * `nominal_control.py`: Nominal controllers
