@@ -1,3 +1,7 @@
+"""
+See explanation below in the __name__ guard.
+"""
+
 from cartpole import Controller, CartPole, simulate, G
 from nominal_control import ControlLQR
 
@@ -26,8 +30,12 @@ class ASIF(Controller):
              |___________________|         |________|
 
     """
-    def __init__(self, nominal_control, cp: CartPole, barrier_cart_vel=1,
-            gamma=1, asif_enabled=True):
+    def __init__(self, nominal_control, cp: CartPole, barrier_cart_vel,
+            gamma, asif_enabled=True, use_nonlinear_dynamics=True):
+        """
+        For our case of cartpole, limitations on cart velocity is enforced
+        by this ASIF.
+        """
         self.nominal_control = nominal_control
         self.cp = cp
 
@@ -35,10 +43,17 @@ class ASIF(Controller):
         self.gamma = gamma
         
         self.asif_enabled = asif_enabled
+        self.use_nonlinear_dynamics = use_nonlinear_dynamics
+        if self.use_nonlinear_dynamics:
+            self._h_dot = self._h_dot_nonlinear
+        else:
+            self._h_dot = self._h_dot_linear
 
         self._log = {
-            'cbf_nom': [],
-            'qp_g': [],
+            'cbf_nominal': [],
+            'cbf_filtered': [],
+            'qp_g_nominal': [],
+            'qp_g_filtered': [],
             'qp_h': [],
             'u_nom': [],
             'u_filtered': [],
@@ -47,37 +62,93 @@ class ASIF(Controller):
     def control_law(self, state):
         u_nominal = self.nominal_control(state)
         u_filtered = self._asif(u_nominal, state)
-        if self.asif_enabled is False:
+        if self.asif_enabled is False: 
             u_filtered = u_nominal  
         # if np.isclose(u_filtered, u_nominal)[0] == False:
         #     print(f"ASIF active! {u_nominal=}, {u_filtered=}")
+
         return u_filtered
 
     def _asif(self, u_nominal, state):
+        m_1 = self.cp.m_1
+        m_2 = self.cp.m_2
+        l = self.cp.l
+
+        # objective function, same for all CBF-QP
         p = np.array([1.])
-        q = np.array([-u_nominal]).flatten()
-        g = np.array([-1/self.cp.m_1])
-        h = np.array([-G*self.cp.m_2/self.cp.m_1*state[2] 
-            + self.gamma*(self.barrier_cart_vel + state[1])])
+        q = np.array([-u_nominal])
+
+        if self.use_nonlinear_dynamics:
+            # the terms come from self.h_dot_nonlinear, organized for standart 
+            # qp solver format
+            delta = m_2*np.sin(state[2])**2 + m_1
+            if state[1] >= 0:  
+                g = np.array([1/delta])
+                h = -1 * np.array([m_2*l*(state[3]**2)*np.sin(state[2])/delta \
+                        + m_2*G*np.sin(state[2])*np.cos(state[2])/delta]) \
+                        + self.gamma*(self._h(state))
+            else:
+                g = np.array([-1/delta])
+                h = np.array([m_2*l*(state[3]**2)*np.sin(state[2])/delta \
+                        + m_2*G*np.sin(state[2])*np.cos(state[2])/delta]) \
+                        + self.gamma*(self._h(state))
+        else:
+            # the terms come from self.h_dot_linear, organized for standart
+            # qp solver format
+            if state[1] >= 0:
+                g = np.array([1/m_1])
+                h = np.array([m_2*G/m_1*state[2] + self.gamma*self._h(state)])
+            else:
+                g = np.array([-1/m_1])
+                h = np.array([-m_2*G/m_1*state[2] + self.gamma*self._h(state)])
 
         u_filtered = solve_qp(p, q, g, h,
-            # lb=np.array([-100.]), 
-            # ub=np.array([100.]),
+            # lb=np.array([-80.]), 
+            # ub=np.array([80.]),
             solver="cvxopt")
 
-        self._log['cbf_nom'].append(self._h(state))
-        self._log['qp_g'].append(g@u_filtered)
+        self._log['cbf_filtered'].append(self.cbf_cstr(state, u_filtered))
+        self._log['cbf_nominal'].append(self.cbf_cstr(state, u_nominal))
+        self._log['qp_g_filtered'].append(g@u_filtered)
+        self._log['qp_g_nominal'].append(g@u_nominal)
         self._log['qp_h'].append(h)
         self._log['u_nom'].append(u_nominal)
         self._log['u_filtered'].append(u_filtered)
 
-        # u_filtered = np.clip(u_filtered, -100, 100)
         return u_filtered
 
     def _h(self, state):
-        return self.barrier_cart_vel + state[1]
+        if state[1] >= 0:
+            return self.barrier_cart_vel - state[1]
+        else:
+            return self.barrier_cart_vel + state[1]
 
+    def _h_dot_nonlinear(self, state, u):
+        """ Equations from cartpole._gen_dynamics._dynamics"""
+        m_1 = self.cp.m_1
+        m_2 = self.cp.m_2
+        l = self.cp.l
+        delta = m_2*np.sin(state[2])**2 + m_1
 
+        if state[1] >= 0:
+            return -1 * (m_2*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta) - u/delta
+        else:
+            return (m_2*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta) + u/delta
+
+    def _h_dot_linear(self, state, u):
+        """ Equations from cartpole.get_ss_A"""
+        m_1 = self.cp.m_1
+        m_2 = self.cp.m_2
+
+        if state[1] >= 0:
+            return m_2*G/m_1*state[2] - u/m_1
+        else:
+            return -m_2*G/m_1*state[2] + u/m_1
+
+    def cbf_cstr(self, state, u):
+        return self.gamma*self._h(state) + self._h_dot(state, u)
 
 def visualize(l, y, t, dt, asif: ASIF, infodict, save=None):
     """
@@ -137,8 +208,8 @@ def visualize(l, y, t, dt, asif: ASIF, infodict, save=None):
     ax2.set_ylabel("Cart velocity")
     ax2.grid(True)
     ax2.axhline(color='black')
-    ax2.axhline(asif.barrier_cart_vel, linestyle='--', color='black')
-    ax2.axhline(-asif.barrier_cart_vel, linestyle='--', color='black')
+    ax2.axhline(asif.barrier_cart_vel, linestyle='--', color='red')
+    ax2.axhline(-asif.barrier_cart_vel, linestyle='--', color='red')
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar = fig.colorbar(ax2_plt, cax=cax, orientation='vertical')
@@ -158,46 +229,91 @@ def visualize(l, y, t, dt, asif: ASIF, infodict, save=None):
     # cbar.set_label('Time')
 
     asif_log = asif.match_log_with_time(t, infodict['nfe'])
-    if len(asif_log['cbf_nom']) > 0:
+    if len(asif_log['cbf_nominal']) > 0:
         ax4 = fig.add_subplot(2, 4, 3)
-        ax4.plot(t, asif_log['cbf_nom'])
-        ax4.axhline(color='black')
+        ax4.plot(t, asif_log['cbf_nominal'], label='u_nominal')
+        ax4.plot(t, asif_log['cbf_filtered'], '--', label='u_filtered')
+        ax4.legend()
+        ax4.grid(True)
         ax4.set_title('CBF')
 
         ax5 = fig.add_subplot(2, 4, 4)
         ax5.plot(t, asif_log['qp_h'], label='h')
-        ax5.plot(t, asif_log['qp_g'], '--', label='g')
+        ax5.plot(t, asif_log['qp_g_nominal'], '-.', label='u_nominal')
+        ax5.plot(t, asif_log['qp_g_filtered'], '--', label='u_filtered')
         ax5.legend()
+        ax5.grid(True)
         ax5.set_title('QP ineq. cstr')
 
         ax6 = fig.add_subplot(2, 4, 7)
         ax6.plot(t, asif_log['u_nom'], label='nominal')
         ax6.plot(t, asif_log['u_filtered'], '--', label='filtered')
         ax6.legend()
+        ax6.grid(True)
         ax6.set_title('Control signal')
 
     if save:
         ani.save(f'{save}.mp4', fps=20)
 
     # plt.tight_layout()
+    plt.subplots_adjust(wspace=0.5)
     plt.show()
 
 
 if __name__ == "__main__":
-    cp = CartPole(m_1=5, m_2=2, l=1.5)
-    
-    controller = ControlLQR(cp)
-    # print(f'{controller.poles=}')
 
-    asif = ASIF(controller, cp, barrier_cart_vel=0.35, asif_enabled=False)
-    # asif = ASIF(controller, cp, barrier_cart_vel=0.35)
+    cp = CartPole(m_1=5, m_2=2, l=1.5)
+    controller = ControlLQR(cp)
+
+    """
+    We are limiting nominal control of LQR with respect to cart velocity with 
+    the use of ASIF.
+
+    Advice: switch asif_enabled below and see its effects
+
+    In this example, I have adjusted the parameters rather carefully; the ASIF 
+    does not cause a major difference in the nominal control. If you make the
+    constraint more strict, it will cause problems. See note 1 below.
+
+    Note 1:
+    Current ASIF formulation do not work well with the nominal control,
+    the simple constraint on only cart velocity causes the ASIF
+    to ignore pendulum state, if we deviate considerably from nominal control
+    the pendulum is likely to fall. Once it has fallen, LQR cant recover since
+    we are out of its operation range (for LQR we are using linearized dynamics
+    around the pendulum up orientation).
+
+    To apply it on an actual case, we better make it more robust. My guess is
+    a more involved CBF, i.e. h, would do the job. An alternative is to use 
+    a controller which can operate independent of the pendulum orientation.
+
+    Note 2:
+    I am surprised by the effect of using linearized dynamics on ASIF, it causes
+    a much stronger correction which kicks the system out of its pendulum up
+    orientation. Then, it becomes unstable as explained above.
+
+    I have made various attempts; however, I could not get ASIF to 
+    operate with linearized dynamics.
+    """
+    asif = ASIF(controller, cp, barrier_cart_vel=0.45, gamma=10,
+        asif_enabled=True, use_nonlinear_dynamics=True)
     cp.set_control_law(asif)
 
-    controller.state_ref = [-1, 0, np.pi, 0]
+    ## go right
+    ## Our formulation of ASIF is quite sensitive to initial conditions,
+    ## see 'Note 1' above
+    controller.state_ref = [1.5, 0, np.pi, 0]
+    x0 = [0, 0., 178 * np.pi/180, 0]
 
-    dt = 0.05
-    (y, infodict), t = simulate(cp, x0=[0, 0, 183 * np.pi/180, 0], dt=dt, 
-        t_end=10, full_output=True)
+    ## go left
+    ## Our formulation of ASIF is quite sensitive to initial conditions,
+    ## see 'Note 1' above
+    # controller.state_ref = [-1.5, 0, np.pi, 0]
+    # x0 = [0, 0., 182 * np.pi/180, 0]
+    
+    dt = 0.03
+    (y, infodict), t = simulate(cp, x0=x0, dt=dt, 
+        full_output=True)
 
     visualize(cp.l, y, t, dt, asif, infodict)
 
