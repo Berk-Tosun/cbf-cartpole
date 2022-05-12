@@ -15,3 +15,12 @@ Folder structure (ordered with increasing difficulty):
 * `ecbf_deterministic`: Exponential CBF with known model (TODO)
 * `ecbf_learning`: Exponential CBF with unknown model, ECBF + learning (TODO)
 
+---
+
+## What is CBF
+
+A good introduction: https://www.youtube.com/watch?v=_Tkn_Hzo4AA&list=PLgDu6Qp_poydAuNfVJrTD53dpnVit_Pt5&index=10
+
+Matching repository of the above presentation: https://github.com/HybridRobotics/CBF-CLF-Helper where you can get the slides.
+
+Another introduction: https://www.youtube.com/watch?v=vmRl8swiEyc&list=PLgDu6Qp_poydAuNfVJrTD53dpnVit_Pt5&index=23
