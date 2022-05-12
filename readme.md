@@ -11,6 +11,9 @@ Folder structure (ordered with increasing difficulty):
 * `cartpole.py`: Cartpole dynamics and simulation, all controllers use it as plant
 * `nominal_control.py`: Nominal controllers
 * `cbf_deterministic`: Safety-Critical control with classical CBF
+  ![CBF Enabled](https://github.com/Berk-Tosun/cbf-cartpole/blob/master/doc/cbf_cartpole_on.gif)
+  ![CBF Disabled](https://github.com/Berk-Tosun/cbf-cartpole/blob/master/doc/cbf_cartpole_on.gif)
+
 * `cbf_learning`: Safety-Critical control with model uncertainty, CBF + learning (TODO)
 * `ecbf_deterministic`: Exponential CBF with known model (TODO)
 * `ecbf_learning`: Exponential CBF with unknown model, ECBF + learning (TODO)
