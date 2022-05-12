@@ -24,8 +24,10 @@ Folder structure (ordered with increasing difficulty):
 
 ## What is CBF
 
-A good introduction: https://www.youtube.com/watch?v=_Tkn_Hzo4AA&list=PLgDu6Qp_poydAuNfVJrTD53dpnVit_Pt5&index=10
+* Recommended introductory [presentation](https://youtu.be/_Tkn_Hzo4AA): Jason Choi, UC Berkeley. Matching [repository](https://github.com/HybridRobotics/CBF-CLF-Helper) of the talk, where you can get the slides and the mentioned matlab code.
 
-Matching repository of the above presentation: https://github.com/HybridRobotics/CBF-CLF-Helper where you can get the slides.
+* [Presentation](https://youtu.be/ZC3T_P_8xpE) by the main author of the CBF framework, Prof. Aaron Ames.
 
-Another introduction: https://www.youtube.com/watch?v=vmRl8swiEyc&list=PLgDu6Qp_poydAuNfVJrTD53dpnVit_Pt5&index=23
+* Another introductory [presentation](https://youtu.be/vmRl8swiEyc): Air Lab Summer School 2020.
+
+* Sample hardware application: [Multi-Layered Safety for Legged Robots via Control Barrier Functions and Model Predictive Control](http://dx.doi.org/10.13140/RG.2.2.17776.89605). Its [presentation](https://youtu.be/xZqapQU2k84) from ICRA 2021.
