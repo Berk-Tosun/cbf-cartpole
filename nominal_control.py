@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # q = np.zeros((4, 4))
     # np.fill_diagonal(q, [25, 1, 10, 100])
     controller = ControlLQR(cp, R=1) # Q=q)
-    print(f'{controller.poles=}')
+    print(f'LQR controller poles: {controller.poles}')
     cp.set_control_law(controller)
 
     controller.state_ref = [-1, 0, np.pi, 0]

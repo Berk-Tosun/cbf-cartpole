@@ -1,5 +1,7 @@
 """
 See explanation below in the __name__ guard.
+
+For critical part, see _asif method of ASIF.
 """
 
 from cartpole import Controller, CartPole, simulate, G
@@ -33,7 +35,7 @@ class ASIF(Controller):
     def __init__(self, nominal_control, cp: CartPole, barrier_cart_vel,
             gamma, asif_enabled=True, use_nonlinear_dynamics=True):
         """
-        For our case of cartpole, limitations on cart velocity is enforced
+        For our case of cartpole, limitations on cart *velocity* is enforced
         by this ASIF.
         """
         self.nominal_control = nominal_control
@@ -78,6 +80,7 @@ class ASIF(Controller):
         p = np.array([1.])
         q = np.array([-u_nominal])
 
+        # constraints
         if self.use_nonlinear_dynamics:
             # the terms come from self.h_dot_nonlinear, organized for standart 
             # qp solver format
