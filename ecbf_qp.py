@@ -1,5 +1,5 @@
 """
-This example is closely based on cbf_deterministic.py.
+This example is closely based on cbf_qp.py.
 
 For the critical part, see _asif method of ASIF.
 """
@@ -47,7 +47,7 @@ class ASIF(Controller):
         self.gamma_2 = gamma_2
         
         self.asif_enabled = asif_enabled
-        # Based on the observations from cbf_deterministic.py, I removed the 
+        # Based on the observations from cbf_qp.py, I removed the 
         # option for linear dynamics; use full, nonlinear dynamics.
         self._h_dot = self._h_dot_nonlinear
 
@@ -83,7 +83,7 @@ class ASIF(Controller):
         # constraints
         """
         In this case, we define h (see self._h) as a function of position. 
-        Unlike velocity (cbf_deterministic.py), we do not get x_double_dot(x_ddot)
+        Unlike velocity (cbf_qp.py), we do not get x_double_dot(x_ddot)
         in the _h_dot. To get the x_double_dot and control term we have to 
         differentiate one more time. In other words, our constraint (self._h) 
         is of relative degree 2. The most popular way of working with high
@@ -271,14 +271,14 @@ if __name__ == "__main__":
     controller = ControlLQR(cp)
 
     """
-    Similar to cbf_deterministic.py, barrier_cart_pos is carefully selected
+    Similar to cbf_qp.py, barrier_cart_pos is carefully selected
     to very slightly overwrite the nominal control. Anything more aggressive
     causes the pole to drop down (I think it is the same reason with regular 
     cbf, our LQR implementation is just not robust.) 
 
     Anyway, feel free to try different values, the barrier does its job.
     NOTE: only positive barrier_cart_pos are implemented. For negative values,
-    we could use the if statements as we used in cbf_deterministic.py.
+    we could use the if statements as we used in cbf_qp.py.
     """
     asif = ASIF(controller, cp, barrier_cart_pos=1.77, gamma_1=10, gamma_2=5,
         asif_enabled=True)
