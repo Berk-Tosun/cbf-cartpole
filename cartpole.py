@@ -98,7 +98,7 @@ class CartPole:
 
         Use langrange or anything or just the source below to get equations of motion
 
-        https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-832-underactuated-robotics-spring-2009/readings/MIT6_832s09_read_ch03.pdf
+        Keywords to help you google: ocw.mit.edu/courses/6-832/2009/Readings/The Acrobot and Cart-Pole
 
             Equations 3.16 & 3.17
         """
