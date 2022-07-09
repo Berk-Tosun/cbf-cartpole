@@ -1,0 +1,3 @@
+[submodule "robotics/ilqr"]
+	path = robotics/ilqr
+	url = https://github.com/anassinator/ilqr
