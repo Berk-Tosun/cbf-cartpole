@@ -167,6 +167,32 @@ class CartPole:
         
         return control.ss(A, B, C, 0)
 
+    def get_eom(self, state):
+        """
+        Return the terms from Equations of Motion:
+
+            D(q)q_ddot + H(q, q_dot) = Bu
+
+            * Mass Matrix, D
+            * NLE (coriolis + centrifugal + gravity), H
+            * Selection matrix, B
+
+        This is equivalent to self._gen_dynamics._dynamics; it just shows the 
+        structure simply. For our case of low dof system (cartpole) it does not
+        have much use, but for higher dof systems using eom directly can come in
+        handy because it avoids inversion of mass matrix.
+        """
+        D = np.array([[self.m_cart + self.m_pole, self.m_pole*self.l*np.cos(state[2])],
+            [self.m_pole*self.l*np.cos(state[2]), self.m_pole*self.l**2]])
+        C = np.array([-self.m_pole*self.l*np.sin(state[2])*state[3]**2, 
+            0]).reshape(2, 1)  # this is not just C; it is C*q_dot.
+        gravity_term = np.array([0, self.m_pole*G*self.l*np.sin(state[2])]
+            ).reshape(2, 1)
+        H = C + gravity_term
+        B = np.array([1, 0]).reshape(2, 1)
+
+        return D, H, B
+
     @staticmethod
     def control_law(x):
         return 0

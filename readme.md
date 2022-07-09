@@ -10,15 +10,16 @@ Folder structure (ordered with increasing difficulty):
 
 * `cartpole.py`: Cartpole dynamics and simulation, all controllers use it as plant
 * `nominal_control.py`: Nominal controllers
-* `cbf_qp`: Safety-Critical control with classical CBF, constrain cart velocity
+* `cbf_qp.py`: Safety-Critical control with classical CBF, constrain cart velocity
 
 |  CBF Enabled             |  CBF Disabled            |
 |--------------------------|--------------------------|
 | ![CBF Enabled](https://github.com/Berk-Tosun/cbf-cartpole/blob/master/doc/cbf_cartpole_on.gif) | ![CBF Disabled](https://github.com/Berk-Tosun/cbf-cartpole/blob/master/doc/cbf_cartpole_off.gif) |
 
-* `ecbf_qp`: Exponential CBF with known model, constrain cart position
+* `ecbf_qp.py`: Exponential CBF with known model, constrain cart position
 * `cbf_qp_learning`: Safety-Critical control with model uncertainty, CBF + learning (TODO)
 * `ecbf_qp_learning`: Exponential CBF with unknown model, ECBF + learning (TODO)
+* `cbf_qp_id.py`: CBF-QP embedded into inverse dynamics formulation.
 
 ---
 
