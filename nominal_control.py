@@ -30,7 +30,7 @@ class ControlLQR(Controller):
         self.state_ref = reference
 
 if __name__ == "__main__":
-    cp = CartPole(m_1=5, m_2=2, l=1.5)
+    cp = CartPole(m_cart=5, m_pole=2, l=1.5)
     
     # q = np.zeros((4, 4))
     # np.fill_diagonal(q, [25, 1, 10, 100])

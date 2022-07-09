@@ -50,11 +50,11 @@ class Controller:
 
 
 class CartPole:
-    def __init__(self, m_1=4, m_2=1, l=1.25):
+    def __init__(self, m_cart=4, m_pole=1, l=1.25):
         """
         Parameters:
-            m_1: Mass of Cart [kg]
-            m_2: Mass at the end of pendulum [kg]
+            m_cart: Mass of Cart [kg]
+            m_pole: Mass at the end of pendulum [kg]
             l: Length of pendulum [m]
         
         .. todo::
@@ -81,8 +81,8 @@ class CartPole:
                                    ︙ q2 (theta)
                                    ︙    
         """
-        self.m_1 = m_1
-        self.m_2 = m_2
+        self.m_cart = m_cart
+        self.m_pole = m_pole
         self.l = l
         # self.d = d
 
@@ -102,7 +102,7 @@ class CartPole:
 
             Equations 3.16 & 3.17
         """
-        m_1, m_2, l = self.m_1, self.m_2, self.l
+        m_cart, m_pole, l = self.m_cart, self.m_pole, self.l
 
         def _dynamics(x, t):    
             dxdt = np.zeros_like(x)
@@ -113,14 +113,14 @@ class CartPole:
             ### with controller
             u = self.control_law(x)
 
-            delta = m_2*np.sin(x[2])**2 + m_1
+            delta = m_pole*np.sin(x[2])**2 + m_cart
 
-            dxdt[1] = m_2*l*(x[3]**2)*np.sin(x[2])/delta \
-                + m_2*G*np.sin(x[2])*np.cos(x[2])/delta \
+            dxdt[1] = m_pole*l*(x[3]**2)*np.sin(x[2])/delta \
+                + m_pole*G*np.sin(x[2])*np.cos(x[2])/delta \
                 + u/delta
 
-            dxdt[3] = - m_2*(x[3]**2)*np.cos(x[2])*np.sin(x[2])/delta \
-                - (m_1 + m_2)*G*np.sin(x[2])/delta/l \
+            dxdt[3] = - m_pole*(x[3]**2)*np.cos(x[2])*np.sin(x[2])/delta \
+                - (m_cart + m_pole)*G*np.sin(x[2])/delta/l \
                 - u*np.cos(x[2])/delta/l
 
             return dxdt
@@ -138,25 +138,25 @@ class CartPole:
         linearize; taken from Ogata's book (Modern Control - modelling chapter).
         Linearization for pendulum for up state; i.e., x = [?, ?, np.pi, ?]
         """
-        m_1, m_2, l = self.m_1, self.m_2, self.l
+        m_cart, m_pole, l = self.m_cart, self.m_pole, self.l
 
         return [
             [0, 1, 0, 0],
-            [0, 0, m_2 * -G /m_1, 0],
+            [0, 0, m_pole * -G /m_cart, 0],
             [0, 0, 0, 1],
-            [0, 0, -(m_1 + m_2) * -G / (m_1*l), 0]
+            [0, 0, -(m_cart + m_pole) * -G / (m_cart*l), 0]
         ]
         ## Steve Brunton ~ adds damping on wheels
         #     b = 1 if pendulum_up else -1
         #     return [
         #         [0, 1, 0, 0],
-        #         [0, -d/m_1, b*m_2*-G/m_1, 0],
+        #         [0, -d/m_cart, b*m_pole*-G/m_cart, 0],
         #         [0, 0, 0, 1],
-        #         [0, -b*d/(m_1*l), b*(m_1+m_2)*G/(m_1*l), 0]
+        #         [0, -b*d/(m_cart*l), b*(m_cart+m_pole)*G/(m_cart*l), 0]
         #     ]
 
     def get_ss_B(self):
-        return np.array([0, 1/self.m_1, 0, 1/(self.m_1 * self.l)])
+        return np.array([0, 1/self.m_cart, 0, 1/(self.m_cart * self.l)])
 
     def get_openloop(self, 
             C = [[1, 0, 0, 0],
@@ -284,7 +284,7 @@ def visualize(l, y, t, dt, save=None):
 
 if __name__ == "__main__":
     # No control, only initial conditions
-    cp = CartPole(m_1=5, m_2=2, l=1.5)
+    cp = CartPole(m_cart=5, m_pole=2, l=1.5)
 
     dt = 0.1
     y, t = simulate(cp, x0=[0, 0, 170 * np.pi/180, 0], dt=dt)

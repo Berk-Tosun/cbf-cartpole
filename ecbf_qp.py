@@ -72,8 +72,8 @@ class ASIF(Controller):
         return u_filtered
     
     def _asif(self, u_nominal, state):
-        m_1 = self.cp.m_1
-        m_2 = self.cp.m_2
+        m_cart = self.cp.m_cart
+        m_pole = self.cp.m_pole
         l = self.cp.l
 
         # objective function, same for all CBF-QP
@@ -96,11 +96,11 @@ class ASIF(Controller):
         # Adjust CBF constraints to match standart qp form: mainly seperate
         # control term (optimization parameter) and the other terms.
 
-        delta = m_2*np.sin(state[2])**2 + m_1
+        delta = m_pole*np.sin(state[2])**2 + m_cart
 
         # copied from CartPole._dynamics, dxdt[1]
-        x_ddot_minus_u = m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta \
+        x_ddot_minus_u = m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta \
                 ## + u/delta  <--- this term goes to other side of inequality,
                 ##                 fills in the variable g. If it was included
                 ##                 the variable would become x_ddot = dxdt[1].
@@ -139,15 +139,15 @@ class ASIF(Controller):
         return self._h_dot(state) + self.gamma_1*self._h(state)
 
     def _h_e_dot(self, state, u):  # NOTE: control signal is included
-        m_1 = self.cp.m_1
-        m_2 = self.cp.m_2
+        m_cart = self.cp.m_cart
+        m_pole = self.cp.m_pole
         l = self.cp.l
 
-        delta = m_2*np.sin(state[2])**2 + m_1
+        delta = m_pole*np.sin(state[2])**2 + m_cart
 
         # copied from CartPole._dynamics, dxdt[1]
-        x_ddot = m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta \
+        x_ddot = m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta \
                  + u/delta  # <-- unlike self._asif formulation, includes control term
         x_dot = state[1]
 
@@ -267,7 +267,7 @@ def visualize(l, y, t, dt, asif: ASIF, infodict, save=None):
 
 
 if __name__ == "__main__":
-    cp = CartPole(m_1=5, m_2=2, l=1.5)
+    cp = CartPole(m_cart=5, m_pole=2, l=1.5)
     controller = ControlLQR(cp)
 
     """

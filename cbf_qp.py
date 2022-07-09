@@ -72,8 +72,8 @@ class ASIF(Controller):
         return u_filtered
 
     def _asif(self, u_nominal, state):
-        m_1 = self.cp.m_1
-        m_2 = self.cp.m_2
+        m_cart = self.cp.m_cart
+        m_pole = self.cp.m_pole
         l = self.cp.l
 
         # objective function, same for all CBF-QP
@@ -84,26 +84,26 @@ class ASIF(Controller):
         if self.use_nonlinear_dynamics:
             # the terms come from self.h_dot_nonlinear, organized for standart 
             # qp solver format
-            delta = m_2*np.sin(state[2])**2 + m_1
+            delta = m_pole*np.sin(state[2])**2 + m_cart
             if state[1] >= 0:  
                 g = np.array([1/delta])
-                h = -1 * np.array([m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                        + m_2*G*np.sin(state[2])*np.cos(state[2])/delta]) \
+                h = -1 * np.array([m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                        + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta]) \
                         + self.gamma*(self._h(state))
             else:
                 g = np.array([-1/delta])
-                h = np.array([m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                        + m_2*G*np.sin(state[2])*np.cos(state[2])/delta]) \
+                h = np.array([m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                        + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta]) \
                         + self.gamma*(self._h(state))
         else:
             # the terms come from self.h_dot_linear, organized for standart
             # qp solver format
             if state[1] >= 0:
-                g = np.array([1/m_1])
-                h = np.array([m_2*G/m_1*state[2] + self.gamma*self._h(state)])
+                g = np.array([1/m_cart])
+                h = np.array([m_pole*G/m_cart*state[2] + self.gamma*self._h(state)])
             else:
-                g = np.array([-1/m_1])
-                h = np.array([-m_2*G/m_1*state[2] + self.gamma*self._h(state)])
+                g = np.array([-1/m_cart])
+                h = np.array([-m_pole*G/m_cart*state[2] + self.gamma*self._h(state)])
 
         u_filtered = solve_qp(p, q, g, h,
             # lb=np.array([-80.]), 
@@ -128,27 +128,27 @@ class ASIF(Controller):
 
     def _h_dot_nonlinear(self, state, u):
         """ Equations from cartpole._gen_dynamics._dynamics"""
-        m_1 = self.cp.m_1
-        m_2 = self.cp.m_2
+        m_cart = self.cp.m_cart
+        m_pole = self.cp.m_pole
         l = self.cp.l
-        delta = m_2*np.sin(state[2])**2 + m_1
+        delta = m_pole*np.sin(state[2])**2 + m_cart
 
         if state[1] >= 0:
-            return -1 * (m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta) - u/delta
+            return -1 * (m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta) - u/delta
         else:
-            return (m_2*l*(state[3]**2)*np.sin(state[2])/delta \
-                + m_2*G*np.sin(state[2])*np.cos(state[2])/delta) + u/delta
+            return (m_pole*l*(state[3]**2)*np.sin(state[2])/delta \
+                + m_pole*G*np.sin(state[2])*np.cos(state[2])/delta) + u/delta
 
     def _h_dot_linear(self, state, u):
         """ Equations from cartpole.get_ss_A"""
-        m_1 = self.cp.m_1
-        m_2 = self.cp.m_2
+        m_cart = self.cp.m_cart
+        m_pole = self.cp.m_pole
 
         if state[1] >= 0:
-            return m_2*G/m_1*state[2] - u/m_1
+            return m_pole*G/m_cart*state[2] - u/m_cart
         else:
-            return -m_2*G/m_1*state[2] + u/m_1
+            return -m_pole*G/m_cart*state[2] + u/m_cart
 
     def cbf_cstr(self, state, u):
         return self.gamma*self._h(state) + self._h_dot(state, u)
@@ -265,7 +265,7 @@ def visualize(l, y, t, dt, asif: ASIF, infodict, save=None):
 
 if __name__ == "__main__":
 
-    cp = CartPole(m_1=5, m_2=2, l=1.5)
+    cp = CartPole(m_cart=5, m_pole=2, l=1.5)
     controller = ControlLQR(cp)
 
     """
