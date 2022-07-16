@@ -41,6 +41,7 @@ class ASIF_ID(Controller):
 
         # equality cstr, equations of motion
         D, H, B = self.cp.get_eom(state)
+        # H = np.zeros((2, 1))  # nonlinear effects have little contribution
         a = np.concatenate((D, -B), axis=1)
         b = -H
 
