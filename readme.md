@@ -27,11 +27,11 @@ Folder structure (ordered with increasing difficulty):
 
 1. Clone the repository
 
-  git clone https://github.com/Berk-Tosun/cbf-cartpole
+    > git clone https://github.com/Berk-Tosun/cbf-cartpole
   
 2. Install required packages
 
-  pip install -r requirements.txt
+    > pip install -r requirements.txt
 
 ## What is CBF?
 
