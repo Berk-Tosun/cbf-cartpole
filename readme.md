@@ -1,3 +1,5 @@
+## Introduction
+
 Following repository is a minimalistic environment for experimenting with 
 Control Barrier Functions (CBF).
 
@@ -21,9 +23,17 @@ Folder structure (ordered with increasing difficulty):
 * `ecbf_qp_learning`: Exponential CBF with unknown model, ECBF + learning (TODO)
 * `cbf_qp_id.py`: CBF-QP embedded into inverse dynamics formulation.
 
----
+## Installaton
 
-## What is CBF
+1. Clone the repository
+
+  git clone https://github.com/Berk-Tosun/cbf-cartpole
+  
+2. Install required packages
+
+  pip install -r requirements.txt
+
+## What is CBF?
 
 * Recommended introductory [presentation](https://youtu.be/_Tkn_Hzo4AA): Jason Choi, UC Berkeley. Matching [repository](https://github.com/HybridRobotics/CBF-CLF-Helper) of the talk, where you can get the slides and the mentioned matlab code.
 
