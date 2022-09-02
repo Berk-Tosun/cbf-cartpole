@@ -23,15 +23,19 @@ Folder structure (ordered with increasing difficulty):
 * `ecbf_qp_learning`: Exponential CBF with unknown model, ECBF + learning (TODO)
 * `cbf_qp_id.py`: CBF-QP embedded into inverse dynamics formulation.
 
-## Installaton
+## Installation
 
 1. Clone the repository
 
-    > git clone https://github.com/Berk-Tosun/cbf-cartpole
-  
+```shell
+git clone https://github.com/Berk-Tosun/cbf-cartpole
+```
+
 2. Install required packages
 
-    > pip install -r requirements.txt
+```shell
+pip install -r requirements.txt
+```
 
 ## What is CBF?
 
