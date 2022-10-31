@@ -1,7 +1,5 @@
 # cbf-cartpole
 
-If you are interested in robotics, check out [my other, more advanced repo](https://github.com/Berk-Tosun/safe-cartpole).
-
 ## Introduction
 
 Following repository is a minimalistic environment for experimenting with 
