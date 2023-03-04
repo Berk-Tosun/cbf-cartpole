@@ -39,6 +39,16 @@ git clone https://github.com/Berk-Tosun/cbf-cartpole
 pip install -r requirements.txt
 ```
 
+## Getting Started
+
+Most python files in this project have a main guard. It means you can directly run them, e.g.:
+
+```shell
+python cbf_qp.py
+```
+
+This will generate one of the figures given in the introduction section.
+
 ## What is CBF?
 
 * Recommended introductory [presentation](https://youtu.be/_Tkn_Hzo4AA): Jason Choi, UC Berkeley. Matching [repository](https://github.com/HybridRobotics/CBF-CLF-Helper) of the talk, where you can get the slides and the mentioned matlab code.
